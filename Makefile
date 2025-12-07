@@ -137,7 +137,6 @@ UPROGS=\
 	$U/_sh\
 	$U/_hw\
 	$U/_sleep\
-	$U/_uptime\
 	$U/_my_shell\
 	$U/_stressfs\
 	$U/_usertests\
@@ -147,6 +146,7 @@ UPROGS=\
 	$U/_logstress\
 	$U/_forphan\
 	$U/_dorphan\
+	$U/_uptime\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

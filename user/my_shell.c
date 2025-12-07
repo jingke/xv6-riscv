@@ -49,6 +49,7 @@ void run_command(char *buf, int nbuf, int *pcp) {
 
   /* Flag to mark sequence command */
   int sequence_cmd = 0;
+  char *sequence_cmd_str = 0;
 
   int i = 0;
 
@@ -63,6 +64,7 @@ void run_command(char *buf, int nbuf, int *pcp) {
   (void)pipe_cmd;
   (void)arguments;
 
+
   /* Parse the command character by character. */
   for (; i < nbuf; i++) {
 
@@ -70,6 +72,21 @@ void run_command(char *buf, int nbuf, int *pcp) {
        sequence_cmd, redirection, pipe_cmd and similar. */
 
     /* ##### Place your code here. */
+    if (buf[i] == '\n') {
+      // end of command 
+      break;
+    }
+    if (buf[i] == ';') {
+      sequence_cmd = 1;
+      // copy buf to sequence_cmd
+      buf[i] = '\0';
+      strcpy (sequence_cmd_str ,buf);
+      break;
+    }
+    if (buf[i] == '|') {
+      pipe_cmd = 1;
+      break;
+    }
 
     if (!(redirection_left || redirection_right)) {
       /* No redirection, continue parsing command. */
