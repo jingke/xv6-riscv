@@ -59,7 +59,7 @@ LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 
-CFLAGS = -Wall -Werror -Wno-unknown-attributes -O -fno-omit-frame-pointer -ggdb -gdwarf-2
+CFLAGS = -Wall -Werror -Wno-unknown-attributes -O -fno-omit-frame-pointer -ggdb -gdwarf-2 -Werror=unused-variable
 CFLAGS += -march=rv64gc
 CFLAGS += -MD
 CFLAGS += -mcmodel=medany
@@ -136,6 +136,9 @@ UPROGS=\
 	$U/_rm\
 	$U/_sh\
 	$U/_hw\
+	$U/_sleep\
+	$U/_uptime\
+	$U/_my_shell\
 	$U/_stressfs\
 	$U/_usertests\
 	$U/_grind\
