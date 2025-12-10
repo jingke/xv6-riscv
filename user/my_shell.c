@@ -136,6 +136,11 @@ void run_command(char *buf, int nbuf, int *pcp) {
       } else {
         /* Start of new argument */
         if (ws == 1) {
+          /* Check if we've reached the argument limit (10) */
+          if (numargs >= 9) {
+            fprintf(2, "Error: Too many arguments (maximum 10)\n");
+            exit(1);
+          }
           arguments[numargs++] = &buf[i];
           ws = 0;
           we = 0;
