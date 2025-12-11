@@ -280,6 +280,8 @@ int main(void) {
 
   static char buf[100];
 
+  fprintf(2, "buffer length: %ld\n", sizeof(buf));
+
   int pcp[2];
   pipe(pcp);
 
@@ -296,8 +298,9 @@ int main(void) {
     int child_status = 0;
     wait(&child_status);
     
+    fprintf(2, "changing directory: %d\n", child_status);
     // Check if child exited with CD command indicator (exit code 2)
-    if ((child_status >>8) == 2) {
+    if (child_status == 2) {
       // Parse CD command from buffer
       char *cmd = buf;
       
@@ -313,12 +316,14 @@ int main(void) {
         // Remove trailing newline
         char *newline = strchr(dir, '\n');
         if (newline) *newline = '\0';
+    fprintf(2, "changing directory: %s\n", newline);
         
         // Default to home directory if no directory specified
         if (*dir == '\0') {
           dir = "/";
         }
         
+        fprintf(2, "changing directory: %s\n", dir);
         // Change directory in parent process
         if (chdir(dir) < 0) {
           fprintf(2, "Error changing directory: %s\n", dir);
