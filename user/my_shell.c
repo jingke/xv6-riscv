@@ -7,19 +7,48 @@ char whitespace[] = " \t\r\n\v";
 
 /* Print the prompt ">>> " and read a line of characters
    from stdin. */   
+// int getcmd(char *buf, int nbuf) {
+//   // Print prompt to standard error
+//   write(2, ">>> ", 4);
+  
+//   // Clear buffer and read input
+//   memset(buf, 0, nbuf);
+//   gets(buf, nbuf);
+  
+//   // Return -1 if input is empty (EOF)
+//   if(buf[0] == 0) {
+//     return -1;
+//   }
+  
+//   return 0;
+// }
+
 int getcmd(char *buf, int nbuf) {
-  // Print prompt to standard error
-  write(2, ">>> ", 4);
-  
-  // Clear buffer and read input
-  memset(buf, 0, nbuf);
-  gets(buf, nbuf);
-  
-  // Return -1 if input is empty (EOF)
-  if(buf[0] == 0) {
-    return -1;
-  }
-  
+    printf(">>> ");
+    // set a counter to control loop
+    int counter = 0;
+    char ch;
+    // use read() to read input, store it to ch, read one char each time
+    int flag = read(0, &ch, 1);
+    
+    // enter the while loop:
+    while(flag == 1){
+      // check if the input is out of the range of buf
+      if(counter < nbuf -1){
+        // check if user press 'Enter', break the loop
+        if(ch == '\n' || ch == '\r'){
+          break;
+        }
+        buf[counter] = ch;
+        counter ++;
+        flag = read(0, &ch, 1);
+      }
+      else{
+          break;
+      }
+    }
+    // put the end sign at the end of buf
+    buf[counter] = '\0';
   return 0;
 }
 
@@ -233,6 +262,12 @@ void run_command(char *buf, int nbuf, int *pcp) {
   }
   
   /* Execute external commands */
+  /* CD command should be handled in parent process, so we exit with special code */
+  if (strcmp(arguments[0], "cd") == 0) {
+    /* Indicate to parent process that this is a CD command */
+    exit(2);
+  }
+  
   exec(arguments[0], arguments);
   
   /* If exec returns, it failed */
@@ -257,16 +292,39 @@ int main(void) {
       Check if run_command found this is
       a CD command and run it if required.
     */
-    // We must ensure the 'child_status' variable is used or removed.
-    // Since it's needed later for 'wait', we initialize it to suppress the warning.
-    int child_status = 0; 
+    // Wait for child process to complete
+    int child_status = 0;
+    wait(&child_status);
     
-    // ##### Place your code here
-    
-    // To prevent unused variable warning, we call wait and use the status.
-    wait(&child_status); 
-
-    // The actual CD logic will go here later.
+    // Check if child exited with CD command indicator (exit code 2)
+    if ((child_status >>8) == 2) {
+      // Parse CD command from buffer
+      char *cmd = buf;
+      
+      // Skip 'cd' command and whitespace
+      while (*cmd == ' ') cmd++;
+      if (strncmp(cmd, "cd", 2) == 0) {
+        cmd += 2;
+        // Skip whitespace after 'cd'
+        while (*cmd == ' ') cmd++;
+        
+        // Get directory name
+        char *dir = cmd;
+        // Remove trailing newline
+        char *newline = strchr(dir, '\n');
+        if (newline) *newline = '\0';
+        
+        // Default to home directory if no directory specified
+        if (*dir == '\0') {
+          dir = "/";
+        }
+        
+        // Change directory in parent process
+        if (chdir(dir) < 0) {
+          fprintf(2, "Error changing directory: %s\n", dir);
+        }
+      }
+    }
   }
   exit(0);
 }
